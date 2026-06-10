@@ -10,7 +10,8 @@ import app.tools  # noqa: F401  # 触发工具自注册
 from app.dispatcher import dispatch
 from app.errors import CODE_TO_STATUS
 from app.models import RunRequest
-from app.trace_store import get_trace, init_db
+from app.agent_run_store import get_run, init_db  # Task 4 will switch the call site below
+
 
 logger = logging.getLogger(__name__)
 

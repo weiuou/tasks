@@ -6,7 +6,8 @@ from uuid import uuid4
 
 from app.errors import ToolExecutionError
 from app.registry import get_tool
-from app.trace_store import insert_trace
+from app.agent_run_store import insert_run  # Task 3 will switch the call site below
+
 
 logger = logging.getLogger(__name__)
 
