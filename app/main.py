@@ -1,11 +1,12 @@
 import logging
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-import app.tools.calculator  # noqa: F401
-import app.tools.echo  # noqa: F401
+import app.tools  # noqa: F401  # 触发工具自注册
 from app.dispatcher import dispatch
 from app.errors import CODE_TO_STATUS
 from app.models import RunRequest
@@ -13,12 +14,14 @@ from app.trace_store import get_trace, init_db
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI()
 
-
-@app.on_event("startup")
-def startup() -> None:
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     init_db()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 def _format_validation_error(exc: RequestValidationError) -> str:
