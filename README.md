@@ -39,17 +39,24 @@ Success (200):
 {"trace_id": "...", "tool": "calculator", "result": 96.0, "latency_ms": 3}
 ```
 
-Failure envelope (4xx/5xx):
+Dispatch-stage error (4xx/5xx from tool execution / routing):
 ```json
 {"trace_id": "...", "error": {"code": "TOOL_NOT_FOUND", "message": "tool 'weather' is not registered"}}
 ```
 
-| 场景 | HTTP | error.code |
-|---|---|---|
-| 参数缺失/不合规 | 422 | `INVALID_REQUEST` |
-| tool 未注册 | 404 | `TOOL_NOT_FOUND` |
-| 工具执行抛业务异常 | 400 | `TOOL_EXECUTION_ERROR` |
-| 未预期异常 | 500 | `INTERNAL_ERROR` |
+Validation-stage error (422 from request body validation, no trace generated):
+```json
+{"error": {"code": "INVALID_REQUEST", "message": "body.message: Field required"}}
+```
+
+| 阶段 | HTTP | error.code | trace_id |
+|---|---|---|---|
+| 参数缺失/不合规(validation) | 422 | `INVALID_REQUEST` | 无 |
+| tool 未注册(dispatch) | 404 | `TOOL_NOT_FOUND` | 有 |
+| 工具执行抛业务异常(dispatch) | 400 | `TOOL_EXECUTION_ERROR` | 有 |
+| 未预期异常(dispatch) | 500 | `INTERNAL_ERROR` | 有 |
+
+> validation 阶段错误不触发工具调用、不写 trace,响应也不带 `trace_id`。只有进入 dispatch 阶段的请求才会生成 trace。
 
 ### GET /agent/traces/{trace_id}
 

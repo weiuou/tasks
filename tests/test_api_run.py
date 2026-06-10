@@ -9,6 +9,18 @@ def test_run_missing_message_returns_422(client):
     assert body["error"]["code"] == "INVALID_REQUEST"
 
 
+def test_validation_error_response_has_no_trace_id(client):
+    """契约锁定:422 错误不生成 trace,响应也不带 trace_id 字段。"""
+    response = client.post(
+        "/agent/run",
+        json={"tool": "echo"},
+    )
+
+    assert response.status_code == 422
+    body = response.json()
+    assert "trace_id" not in body
+
+
 def test_run_calculator_success(client):
     response = client.post(
         "/agent/run",
